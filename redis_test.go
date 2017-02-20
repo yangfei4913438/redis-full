@@ -46,3 +46,7 @@ func Test_CheckGETBIT(t *testing.T) {
 func Test_CheckGetBitSetBit(t *testing.T) {
 	CheckGetBitSetBit(t, newRedisCache)
 }
+
+func Test_CheckBitOP(t *testing.T) {
+	CheckBitOP(t, newRedisCache)
+}

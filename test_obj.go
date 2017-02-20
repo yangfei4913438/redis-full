@@ -64,3 +64,23 @@ func CheckGetBitSetBit(t *testing.T, newredis RedisFactory) {
 		return
 	}
 }
+
+func CheckBitOP(t *testing.T, newredis RedisFactory) {
+	redisDB := newredis(t, time.Hour)
+	data := map[string]interface{}{
+		"a": "bar",
+		"b": "aar",
+	}
+	if err := redisDB.MSet(data, redisDB.defaultExpiration); err != nil {
+		t.Errorf("An unexpected error occurred: %s", err)
+		return
+	}
+	res, err := redisDB.BITOP("OR", "a", "b")
+	if err != nil {
+		t.Errorf("An unexpected error occurred: %s", err)
+		return
+	}
+	if res != "car" {
+		t.Errorf("result is error! right result is car, but get %v", res)
+	}
+}

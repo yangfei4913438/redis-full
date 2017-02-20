@@ -106,10 +106,10 @@ func (c RedisCache) Flush() error {
 }
 
 //some tools
-func IntIsBody(s []int, y int) bool {
-	m := make(map[int]int)
+func IsBody(s []interface{}, y interface{}) bool {
+	m := make(map[interface{}]int)
 	for _, v := range s {
-		var x []int
+		var x []interface{}
 		for i := 0; i < len(s); i++ {
 			if v == s[i] {
 				x = append(x, v)
