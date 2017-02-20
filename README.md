@@ -7,7 +7,7 @@ Use `go get` to install or upgrade (`-u`) the `redis-full` package.
     go get -u github.com/yangfei4913438/redis-full
 
 ## Usage
-Like on the command line using redis to use it!
+Like on the command line using redis to use it! 
 
 For Example:
 
