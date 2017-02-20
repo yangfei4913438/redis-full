@@ -65,7 +65,7 @@ func (c RedisCache) BITOP(opt string, key1, key2 string) (string, error) {
 		return "", err
 	} else {
 		//This is not a must delete key.
-		c.Del("bitop_recive_data")
+		c.Del(value)
 		return str, nil
 	}
 }
