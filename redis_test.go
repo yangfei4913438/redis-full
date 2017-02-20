@@ -10,7 +10,7 @@ import (
 
 // These tests require redis server running on localhost:6379 (the default)
 const (
-	redisTestServer = "localhost:6379"
+	redisTestServer = "10.0.0.7:6379"
 	redispassword = ""
 	MaxIdle = 1000
 	MaxActive = 1000
