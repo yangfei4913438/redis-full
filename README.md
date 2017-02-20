@@ -1,4 +1,4 @@
-# redis-full
+# redis-full [![wercker status](https://app.wercker.com/status/5151a44054cbd71b158674b5b6093a6b/s/master "wercker status")](https://app.wercker.com/project/byKey/5151a44054cbd71b158674b5b6093a6b)
 all of the redis method
 
 ## How to install
