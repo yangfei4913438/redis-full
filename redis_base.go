@@ -32,6 +32,18 @@ func (c RedisCache) Set(key string, value interface{}, expires time.Duration) er
 	return nil
 }
 
+func (c RedisCache) MSet(args map[string]interface{}, expires time.Duration) error {
+	conn := c.pool.Get()
+	defer conn.Close()
+
+	for k,v := range args {
+		if err := c.Set(k, v, expires); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (c RedisCache) Get(key string, ptrValue interface{}) error {
 	conn := c.pool.Get()
 	defer conn.Close()
@@ -50,6 +62,24 @@ func (c RedisCache) Get(key string, ptrValue interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func (c RedisCache) MGet(keys ...string) (map[string]interface{}, error) {
+	conn := c.pool.Get()
+	defer conn.Close()
+
+	values := make(map[string]interface{}, len(keys))
+
+	for _, v := range keys {
+		var data interface{}
+		if err := c.Get(v, &data); err != nil {
+			return nil, err
+		} else {
+			values[v] = data
+		}
+	}
+
+	return values, nil
 }
 
 func (c RedisCache) Del(key string) error {
