@@ -2,8 +2,8 @@
 all of the redis method
 
 ## DEV Version
-Redis version: 3.2.5
-Go version: 1.8
+- Redis version: 3.2.5
+- Go version: 1.8
 
 ## How to install
 Use `go get` to install or upgrade (`-u`) the `redis-full` package.
