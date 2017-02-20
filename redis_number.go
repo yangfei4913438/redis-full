@@ -79,7 +79,7 @@ func (c RedisCache) DECR(key string, expires time.Duration) error {
 	return nil
 }
 
-func (c RedisCache) DECRBY(key string, value int,expires time.Duration) error {
+func (c RedisCache) DECRBY(key string, value int, expires time.Duration) error {
 	conn := c.pool.Get()
 	defer conn.Close()
 
@@ -128,8 +128,3 @@ func (c RedisCache) INCRBYFLOAT(key string, value float64, expires time.Duration
 
 	return nil
 }
-
-
-
-
-

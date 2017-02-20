@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-
 func (c RedisCache) APPEND(key string, value string, expires time.Duration) error {
 	conn := c.pool.Get()
 	defer conn.Close()
@@ -30,7 +29,6 @@ func (c RedisCache) APPEND(key string, value string, expires time.Duration) erro
 	return nil
 }
 
-
 func (c RedisCache) STRLEN(key string) (int64, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
@@ -40,6 +38,5 @@ func (c RedisCache) STRLEN(key string) (int64, error) {
 		return -1, err
 	}
 
-	return int64(res.(int64)) ,nil
+	return int64(res.(int64)), nil
 }
-

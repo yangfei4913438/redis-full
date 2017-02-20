@@ -36,7 +36,7 @@ func (c RedisCache) MSet(args map[string]interface{}, expires time.Duration) err
 	conn := c.pool.Get()
 	defer conn.Close()
 
-	for k,v := range args {
+	for k, v := range args {
 		if err := c.Set(k, v, expires); err != nil {
 			return err
 		}
@@ -91,4 +91,17 @@ func (c RedisCache) Del(key string) error {
 	} else {
 		return nil
 	}
+}
+
+func (c RedisCache) MDEL(keys ...string) error {
+	conn := c.pool.Get()
+	defer conn.Close()
+
+	for _, v := range keys {
+		if err := c.Del(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

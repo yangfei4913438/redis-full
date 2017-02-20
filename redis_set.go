@@ -4,13 +4,11 @@ import (
 	"time"
 )
 
-
 func (c RedisCache) SADD(key string, expires time.Duration, args ...interface{}) error {
-
-	times := int(expires / time.Second)
-
 	conn := c.pool.Get()
 	defer conn.Close()
+
+	times := int(expires / time.Second)
 
 	for _, v := range args {
 		if times > 0 {
@@ -18,12 +16,10 @@ func (c RedisCache) SADD(key string, expires time.Duration, args ...interface{})
 			if err != nil {
 				return err
 			}
-
 			_, err = conn.Do("EXPIRE", key, times)
 			if err != nil {
 				return err
 			}
-
 		} else {
 			_, err := conn.Do("SADD", key, v)
 			if err != nil {

@@ -91,7 +91,7 @@ func (c RedisCache) HSETMAP(key string, args map[string]string, expires time.Dur
 	conn := c.pool.Get()
 	defer conn.Close()
 
-	for k,v := range args {
+	for k, v := range args {
 		if err := c.HSET(key, k, v, expires); err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func (c RedisCache) HDEL(key, field string) error {
 	conn := c.pool.Get()
 	defer conn.Close()
 
-	_ , err := conn.Do("HDEL", key, field)
+	_, err := conn.Do("HDEL", key, field)
 	if err != nil {
 		return err
 	} else {

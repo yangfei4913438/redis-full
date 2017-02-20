@@ -15,7 +15,7 @@ type RedisCache struct {
 var ErrCacheMiss = errors.New("redis_full: key not found.")
 
 // until redigo supports sharding/clustering, only one host will be in hostList
-func NewRedisCache(host, password string,MaxIdle,MaxActive int, IdleTimeout,defaultExpiration time.Duration) RedisCache {
+func NewRedisCache(host, password string, MaxIdle, MaxActive int, IdleTimeout, defaultExpiration time.Duration) RedisCache {
 	var pool = &redis.Pool{
 		MaxIdle:     MaxIdle,
 		MaxActive:   MaxActive,
@@ -50,7 +50,6 @@ func NewRedisCache(host, password string,MaxIdle,MaxActive int, IdleTimeout,defa
 	}
 	return RedisCache{pool, defaultExpiration}
 }
-
 
 func (c RedisCache) CheckRedis() error {
 	conn := c.pool.Get()
