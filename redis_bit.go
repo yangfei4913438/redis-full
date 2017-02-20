@@ -96,7 +96,7 @@ func (c RedisCache) SETBIT(key string, offset, value int, expires time.Duration)
 	defer conn.Close()
 
 	if !IsBody([]interface{}{0, 1}, value) {
-		return errors.New("Value is only allowed is 0 or 1.")
+		return errors.New("Value only allowed 0 or 1.")
 	}
 
 	times := int(expires / time.Second)
