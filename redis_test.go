@@ -33,8 +33,8 @@ var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) RedisCac
 	panic("")
 }
 
-//start test ...
+//TaskName must be start with Test_ prefix。
 
-func TestRedisCache_TypicalGetSet(t *testing.T) {
-	typicalGetSet(t, newRedisCache)
+func TestWork(t *testing.T) {
+	CheckExists(t, newRedisCache)
 }

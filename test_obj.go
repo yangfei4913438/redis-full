@@ -7,22 +7,18 @@ import (
 
 type redisFactory func(*testing.T, time.Duration) RedisCache
 
-// Test typical cache interactions
-func typicalGetSet(t *testing.T, newredis redisFactory) {
-	var err error
+//TEST EXIST METHOD
+func CheckExists(t *testing.T, newredis redisFactory) {
 	redisDB := newredis(t, time.Hour)
-
-	value := "foo"
-	if err = redisDB.Set("value", value, 2*time.Hour); err != nil {
+	if err := redisDB.Set("value", "1234", 2*time.Hour); err != nil {
 		t.Errorf("Error setting a value: %s", err)
 	}
-
-	value = ""
-	err = redisDB.Get("value", &value)
+	ok, err := redisDB.Exists("value")
 	if err != nil {
-		t.Errorf("Error getting a value: %s", err)
+		t.Errorf("found an accident %v", err)
+		return
 	}
-	if value != "foo" {
-		t.Errorf("Expected to get foo back, got %s", value)
+	if !ok {
+		t.Error("the key value is not exist!")
 	}
 }
