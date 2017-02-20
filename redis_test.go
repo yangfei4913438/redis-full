@@ -35,6 +35,14 @@ var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) RedisCac
 
 //TaskName must be start with Test_ prefix。
 
-func TestWork(t *testing.T) {
+func Test_CheckExists(t *testing.T) {
 	CheckExists(t, newRedisCache)
+}
+
+func Test_CheckGETBIT(t *testing.T) {
+	CheckGETBIT(t, newRedisCache)
+}
+
+func Test_CheckGetBitSetBit(t *testing.T) {
+	CheckGetBitSetBit(t, newRedisCache)
 }

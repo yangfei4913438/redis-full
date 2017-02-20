@@ -104,3 +104,18 @@ func (c RedisCache) Flush() error {
 	_, err := conn.Do("FLUSHALL")
 	return err
 }
+
+//some tools
+func IntIsBody(s []int, y int) bool {
+	m := make(map[int]int)
+	for _, v := range s {
+		var x []int
+		for i := 0; i < len(s); i++ {
+			if v == s[i] {
+				x = append(x, v)
+			}
+		}
+		m[v] = len(x)
+	}
+	return m[y] > 0
+}
