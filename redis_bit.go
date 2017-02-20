@@ -46,13 +46,22 @@ func (c RedisCache) BITOP(opt string, key1, key2 string) (string, error) {
 		return "", errors.New("Not found key: " + key2)
 	}
 
-	_, err = conn.Do("BITOP", strings.ToUpper(opt), "bitop_recive_data", key1, key2)
+	value := "bItOp_rEcIve_dATa"
+	ok3, err := c.Exists(value)
+	if err != nil {
+		return "", err
+	}
+	if ok3 {
+		value = value + "_suan_ni_xiao_zi_niu_bi_wo_fu_le_from_yangfei"
+	}
+
+	_, err = conn.Do("BITOP", strings.ToUpper(opt), value, key1, key2)
 	if err != nil {
 		return "", err
 	}
 
 	var str string
-	if err := c.Get("bitop_recive_data", &str); err != nil {
+	if err := c.Get(value, &str); err != nil {
 		return "", err
 	} else {
 		//This is not a must delete key.
