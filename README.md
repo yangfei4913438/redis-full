@@ -8,6 +8,7 @@ Use `go get` to install or upgrade (`-u`) the `redis-full` package.
 
 ## Usage
 Like on the command line using redis to use it!
+
 For Example:
 
 ```golang
@@ -52,8 +53,8 @@ func (c App) GET() revel.Result {
 
 ## Be careful!
     - The GET method and SET method is depend on each other!
-    - Objects are stored in the redis before will first serialized using JSON.
-    - Objects were taken out from the redis, before using, will first deserialization using JSON.
+    - Before the Objects are stored to redis, it will first serialized using JSON.
+    - Objects were taken out from the redis, before using, it will first deserialization using JSON.
 
 # Document
 `Please be patient...`
