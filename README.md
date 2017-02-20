@@ -9,9 +9,64 @@ Use `go get` to install or upgrade (`-u`) the `redis-full` package.
 ## Usage
 Like on the command line using redis to use it! 
 
+#### - use in revel
+
+1）add a file
+
+```golang
+
+package app
+
+import (
+	"github.com/revel/revel"
+	redis "github.com/yangfei4913438/redis-full"
+	"time"
+)
+
+var RedisDB redis.RedisCache
+
+func InitRedis() {
+	hosts, _ := revel.Config.String("cache.hosts")
+	password, _ := revel.Config.String("cache.redis.password")
+	MaxIdle := revel.Config.IntDefault("cache.redis.maxidle", 5)
+	MaxActive := revel.Config.IntDefault("cache.redis.maxactive", 0)
+	IdleTimeout := time.Duration(revel.Config.IntDefault("cache.redis.idletimeout", 180)) * time.Second
+
+	RedisDB = redis.NewRedisCache(hosts, password, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
+
+	if err := RedisDB.CheckRedis(); err != nil {
+		revel.ERROR.Println("Redis Connect failed!")
+	} else {
+		revel.INFO.Println("Redis Connected!")
+	}
+
+}
+
+```
+
+2) regist to init.go 
+
+```golang
+
+func init(){
+    revel.OnAppStart(InitRedis)
+}
+
+```
+
+3) use it! so easy!
+
 For Example:
 
 ```golang
+
+package controllers
+
+import (
+	"github.com/revel/revel"
+	"github.com/yangfei4913438/reveladd/app"
+	"time"
+)
 
 func (c App) SET() revel.Result {
 	value1 := "hello"
@@ -56,5 +111,4 @@ func (c App) GET() revel.Result {
     - Before the Objects are stored to redis, it will first serialized using JSON.
     - Objects were taken out from the redis, before using, it will first deserialization using JSON.
 
-# Document
-`Please be patient...`
+## More documentation, please be patient!
