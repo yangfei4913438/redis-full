@@ -65,6 +65,14 @@ func Test_CheckLINDEX(t *testing.T) {
 	CheckLINDEX(t, newRedisCache)
 }
 
+func Test_CheckSMEMBERS(t *testing.T) {
+	CheckSMEMBERS(t, newRedisCache)
+}
+
+func Test_CheckSCARD(t *testing.T) {
+	CheckSCARD(t, newRedisCache)
+}
+
 // Please insert test method before the Test_END method!!!
 
 //CHECK END!
