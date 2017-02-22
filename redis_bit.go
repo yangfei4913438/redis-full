@@ -10,6 +10,14 @@ func (c RedisCache) BITCOUNT(key string, start, end int) (int64, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
 
+	ok, err := c.Exists(key)
+	if err != nil {
+		return -1, err
+	}
+	if !ok {
+		return -1, ErrCacheMiss
+	}
+
 	res, err := conn.Do("BITCOUNT", key, start, end)
 	if err != nil {
 		return -1, err

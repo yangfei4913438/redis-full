@@ -49,6 +49,14 @@ func (c RedisCache) SISMEMBER(key string, value interface{}) (bool, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
 
+	ok, err := c.Exists(key)
+	if err != nil {
+		return false, err
+	}
+	if !ok {
+		return false, ErrCacheMiss
+	}
+
 	res, err := conn.Do("SISMEMBER", key, value)
 	if err != nil {
 		return false, err
@@ -60,6 +68,14 @@ func (c RedisCache) SISMEMBER(key string, value interface{}) (bool, error) {
 func (c RedisCache) SCARD(key string) (int64, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
+
+	ok, err := c.Exists(key)
+	if err != nil {
+		return -1, err
+	}
+	if !ok {
+		return -1, ErrCacheMiss
+	}
 
 	res, err := conn.Do("SCARD", key)
 	if err != nil {

@@ -34,11 +34,17 @@ func (c RedisCache) HGET(key, field string) (string, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
 
+	ok, err := c.Exists(key)
+	if err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", ErrCacheMiss
+	}
+
 	raw, err := conn.Do("HGET", key, field)
 	if err != nil {
 		return "", err
-	} else if raw == nil {
-		return "", ErrCacheMiss
 	}
 
 	item, err := redis.Bytes(raw, err)
@@ -78,6 +84,14 @@ func (c RedisCache) HKEYS(key string) ([]string, error) {
 func (c RedisCache) HLEN(key string) (int64, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
+
+	ok, err := c.Exists(key)
+	if err != nil {
+		return -1, err
+	}
+	if !ok {
+		return -1, ErrCacheMiss
+	}
 
 	res, err := conn.Do("HLEN", key)
 	if err != nil {

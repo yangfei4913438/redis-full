@@ -47,12 +47,20 @@ func (c RedisCache) MSet(args map[string]interface{}, expires time.Duration) err
 func (c RedisCache) Get(key string, ptrValue interface{}) error {
 	conn := c.pool.Get()
 	defer conn.Close()
+
+	ok, err := c.Exists(key)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrCacheMiss
+	}
+
 	raw, err := conn.Do("GET", key)
 	if err != nil {
 		return err
-	} else if raw == nil {
-		return ErrCacheMiss
 	}
+
 	item, err := redis.Bytes(raw, err)
 	if err != nil {
 		return err

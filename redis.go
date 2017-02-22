@@ -66,6 +66,14 @@ func (c RedisCache) Life(key string) (int64, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
 
+	ok, err := c.Exists(key)
+	if err != nil {
+		return -1, err
+	}
+	if !ok {
+		return -1, ErrCacheMiss
+	}
+
 	res, err := conn.Do("TTL", key)
 	if err != nil {
 		return -1, err
@@ -77,6 +85,14 @@ func (c RedisCache) Life(key string) (int64, error) {
 func (c RedisCache) Type(key string) (string, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
+
+	ok, err := c.Exists(key)
+	if err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", ErrCacheMiss
+	}
 
 	res, err := conn.Do("TYPE", key)
 	if err != nil {
