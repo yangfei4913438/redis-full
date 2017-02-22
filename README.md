@@ -75,7 +75,7 @@ import (
 func (c App) SET() revel.Result {
 	value1 := "hello"
 
-	if err := app.RedisDB.Set("student", value1, 12*time.Hour); err != nil {
+	if err := app.RedisDB.SetJSON("student", value1, 12*time.Hour); err != nil {
 		data := map[string]interface{}{
 			"status": false,
 			"result": "Set the value of the key to redis failed!" + err.Error(),
@@ -93,7 +93,7 @@ func (c App) SET() revel.Result {
 func (c App) GET() revel.Result {
 	var res string
 
-	if err := app.RedisDB.Get("student", &res); err != nil {
+	if err := app.RedisDB.GetJSON("student", &res); err != nil {
 		data := map[string]interface{}{
 			"status": false,
 			"result": "Failed to get the value of the key! " + err.Error(),
@@ -111,7 +111,7 @@ func (c App) GET() revel.Result {
 ```
 
 ## Be careful!
-    - The GET method and SET method is depend on each other!
+    - The GETJSON method and SETJSON method is depend on each other!
     - Before the Objects are stored to redis, it will first serialized using JSON.
     - Objects were taken out from the redis, before using, it will first deserialization using JSON.
 
