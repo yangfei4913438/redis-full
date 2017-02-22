@@ -10,13 +10,13 @@ type RedisFactory func(*testing.T, time.Duration) RedisCache
 func CheckGET(t *testing.T, newredis RedisFactory) {
 	redisDB := newredis(t, time.Hour)
 
-	if err := redisDB.Set("name", "LiLei", 2*time.Hour); err != nil {
+	if err := redisDB.SetJSON("name", "LiLei", 2*time.Hour); err != nil {
 		t.Errorf("An unexpected error occurred: %s", err)
 		return
 	}
 
 	var name string
-	if err := redisDB.Get("name", &name); err != nil {
+	if err := redisDB.GetJSON("name", &name); err != nil {
 		t.Errorf("An unexpected error occurred: %v", err)
 		return
 	}
@@ -34,12 +34,12 @@ func CheckMGET(t *testing.T, newredis RedisFactory) {
 		"age":  "18",
 	}
 
-	if err := redisDB.MSet(data, 2*time.Hour); err != nil {
+	if err := redisDB.MSetJSON(data, 2*time.Hour); err != nil {
 		t.Errorf("An unexpected error occurred: %s", err)
 		return
 	}
 
-	res, err := redisDB.MGet("name", "age")
+	res, err := redisDB.MGetJSON("name", "age")
 	if err != nil {
 		t.Errorf("An unexpected error occurred: %v", err)
 		return

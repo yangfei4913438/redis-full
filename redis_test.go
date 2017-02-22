@@ -33,6 +33,12 @@ var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) RedisCac
 	panic("")
 }
 
+//THE END METHOD
+func CheckEND(t *testing.T, newredis RedisFactory) {
+	redisDB := newredis(t, time.Hour)
+	redisDB.Flush()
+}
+
 //TaskName must be start with Test_ prefix。
 
 func Test_CheckGET(t *testing.T) {
@@ -53,4 +59,15 @@ func Test_CheckGetBitSetBit(t *testing.T) {
 
 func Test_CheckBitOP(t *testing.T) {
 	CheckBitOP(t, newRedisCache)
+}
+
+func Test_CheckLINDEX(t *testing.T) {
+	CheckLINDEX(t, newRedisCache)
+}
+
+// Please insert test method before the Test_END method!!!
+
+//CHECK END!
+func Test_END(t *testing.T) {
+	CheckEND(t, newRedisCache)
 }

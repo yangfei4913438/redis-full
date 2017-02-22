@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (c RedisCache) Set(key string, value interface{}, expires time.Duration) error {
+func (c RedisCache) SetJSON(key string, value interface{}, expires time.Duration) error {
 	conn := c.pool.Get()
 	defer conn.Close()
 
@@ -32,19 +32,19 @@ func (c RedisCache) Set(key string, value interface{}, expires time.Duration) er
 	return nil
 }
 
-func (c RedisCache) MSet(args map[string]interface{}, expires time.Duration) error {
+func (c RedisCache) MSetJSON(args map[string]interface{}, expires time.Duration) error {
 	conn := c.pool.Get()
 	defer conn.Close()
 
 	for k, v := range args {
-		if err := c.Set(k, v, expires); err != nil {
+		if err := c.SetJSON(k, v, expires); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (c RedisCache) Get(key string, ptrValue interface{}) error {
+func (c RedisCache) GetJSON(key string, ptrValue interface{}) error {
 	conn := c.pool.Get()
 	defer conn.Close()
 
@@ -72,7 +72,7 @@ func (c RedisCache) Get(key string, ptrValue interface{}) error {
 	return nil
 }
 
-func (c RedisCache) MGet(keys ...string) (map[string]interface{}, error) {
+func (c RedisCache) MGetJSON(keys ...string) (map[string]interface{}, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
 
@@ -80,7 +80,7 @@ func (c RedisCache) MGet(keys ...string) (map[string]interface{}, error) {
 
 	for _, v := range keys {
 		var data interface{}
-		if err := c.Get(v, &data); err != nil {
+		if err := c.GetJSON(v, &data); err != nil {
 			return nil, err
 		} else {
 			values[v] = data

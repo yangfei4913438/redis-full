@@ -7,7 +7,7 @@ import (
 
 func CheckGETBIT(t *testing.T, newredis RedisFactory) {
 	redisDB := newredis(t, time.Hour)
-	if err := redisDB.Set("name", "tom", 2*time.Hour); err != nil {
+	if err := redisDB.SetJSON("name", "tom", 2*time.Hour); err != nil {
 		t.Errorf("An unexpected error occurred: %s", err)
 		return
 	}
@@ -24,7 +24,7 @@ func CheckGETBIT(t *testing.T, newredis RedisFactory) {
 
 func CheckGetBitSetBit(t *testing.T, newredis RedisFactory) {
 	redisDB := newredis(t, time.Hour)
-	if err := redisDB.Set("bit", "abc", 2*time.Hour); err != nil {
+	if err := redisDB.SetJSON("bit", "abc", 2*time.Hour); err != nil {
 		t.Errorf("An unexpected error occurred: %s", err)
 		return
 	}
@@ -52,7 +52,7 @@ func CheckBitOP(t *testing.T, newredis RedisFactory) {
 		"a": "bar",
 		"b": "aar",
 	}
-	if err := redisDB.MSet(data, redisDB.defaultExpiration); err != nil {
+	if err := redisDB.MSetJSON(data, redisDB.defaultExpiration); err != nil {
 		t.Errorf("An unexpected error occurred: %s", err)
 		return
 	}

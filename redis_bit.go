@@ -69,7 +69,7 @@ func (c RedisCache) BITOP(opt string, key1, key2 string) (string, error) {
 	}
 
 	var str string
-	if err := c.Get(value, &str); err != nil {
+	if err := c.GetJSON(value, &str); err != nil {
 		return "", err
 	} else {
 		//This is not a must delete key.
