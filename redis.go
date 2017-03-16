@@ -15,37 +15,26 @@ type RedisCache struct {
 var ErrCacheMiss = errors.New("redis_full: key not found.")
 
 // until redigo supports sharding/clustering, only one host will be in hostList
-func NewRedisCache(host, password string, MaxIdle, MaxActive int, IdleTimeout, defaultExpiration time.Duration) RedisCache {
+func NewRedisCache(host, password string, database, MaxIdle, MaxActive int, IdleTimeout, defaultExpiration time.Duration) RedisCache {
 	var pool = &redis.Pool{
 		MaxIdle:     MaxIdle,
 		MaxActive:   MaxActive,
 		IdleTimeout: IdleTimeout,
 		Dial: func() (redis.Conn, error) {
 			protocol := "tcp"
-			c, err := redis.Dial(protocol, host)
+			c, err := redis.Dial(
+				protocol,
+				host,
+				redis.DialDatabase(database),
+				redis.DialPassword(password),
+				redis.DialConnectTimeout(time.Second*5),
+				redis.DialWriteTimeout(time.Second*3),
+				redis.DialReadTimeout(time.Second*3),
+			)
 			if err != nil {
 				return nil, err
 			}
-			if len(password) > 0 {
-				if _, err := c.Do("AUTH", password); err != nil {
-					c.Close()
-					return nil, err
-				}
-			} else {
-				// check with PING
-				if _, err := c.Do("PING"); err != nil {
-					c.Close()
-					return nil, err
-				}
-			}
 			return c, err
-		},
-		// custom connection test method
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			if _, err := c.Do("PING"); err != nil {
-				return err
-			}
-			return nil
 		},
 	}
 	return RedisCache{pool, defaultExpiration}
