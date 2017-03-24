@@ -12,6 +12,7 @@ import (
 const (
 	redisTestServer = "10.0.0.7:6379"
 	redispassword   = ""
+	redisdatabase   = 0
 	MaxIdle         = 1000
 	MaxActive       = 1000
 	IdleTimeout     = 30 * time.Minute
@@ -24,7 +25,7 @@ var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) RedisCac
 	if err == nil {
 		c.Write([]byte("flush_all\r\n"))
 		c.Close()
-		redisCache := NewRedisCache(redisTestServer, redispassword, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
+		redisCache := NewRedisCache(redisTestServer, redispassword, redisdatabase, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
 		redisCache.Flush()
 		return redisCache
 	}
