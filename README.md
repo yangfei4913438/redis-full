@@ -15,35 +15,31 @@ Like on the command line using redis to use it!
 
 #### - use in revel
 
-1）add a file
+1）add a init file
 
 ```golang
 
 package app
 
 import (
+	"xxxxx/app/models"
 	"github.com/revel/revel"
-	redis "github.com/yangfei4913438/redis-full"
 	"time"
 )
 
-var RedisDB redis.RedisCache
-
 func InitRedis() {
-	hosts, _ := revel.Config.String("cache.hosts")
-	password, _ := revel.Config.String("cache.redis.password")
-	MaxIdle := revel.Config.IntDefault("cache.redis.maxidle", 5)
-	MaxActive := revel.Config.IntDefault("cache.redis.maxactive", 0)
-	IdleTimeout := time.Duration(revel.Config.IntDefault("cache.redis.idletimeout", 180)) * time.Second
+	hosts, _ := revel.Config.String("cache.redis.hosts")
+	password := revel.Config.StringDefault("cache.redis.password", "")
+	database := revel.Config.IntDefault("cache.redis.db", 0)
+	MaxIdle := revel.Config.IntDefault("cache.redis.maxidle", 100)
+	MaxActive := revel.Config.IntDefault("cache.redis.maxactive", 1000)
+	IdleTimeout := time.Duration(revel.Config.IntDefault("cache.redis.idletimeout", 600)) * time.Second
 
-	RedisDB = redis.NewRedisCache(hosts, password, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
-
-	if err := RedisDB.CheckRedis(); err != nil {
-		revel.ERROR.Println("Redis Connect failed!")
+	if err := models.NewRD(hosts, password, database, MaxIdle, MaxActive, IdleTimeout); err != nil {
+		revel.ERROR.Println("Redis Server:" + hosts + " Connect failed: " + err.Error() + "!")
 	} else {
-		revel.INFO.Println("Redis Connected!")
+		revel.INFO.Println("Redis Server:" + hosts + " Connected!")
 	}
-
 }
 
 ```
@@ -58,54 +54,51 @@ func init(){
 
 ```
 
-3) use it! so easy!
-
-For Example:
+3) add redis model file
 
 ```golang
-
-package controllers
+package models
 
 import (
-	"github.com/revel/revel"
-	"github.com/yangfei4913438/reveladd/app"
+	redis "github.com/yangfei4913438/redis-full"
 	"time"
 )
 
-func (c App) SET() revel.Result {
-	value1 := "hello"
+var RedisDB redis.RedisCache
 
-	if err := app.RedisDB.SetJSON("student", value1, 12*time.Hour); err != nil {
-		data := map[string]interface{}{
-			"status": false,
-			"result": "Set the value of the key to redis failed!" + err.Error(),
-		}
-		return c.RenderJson(data)
-	}
+func NewRD(hosts, password string, database, MaxIdle, MaxActive int, IdleTimeout time.Duration) error {
 
-	data := map[string]interface{}{
-		"status": true,
-		"result": "Set the value of the key to redis success!",
-	}
-	return c.RenderJson(data)
+	RedisDB = redis.NewRedisCache(hosts, password, database, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
+
+	return RedisDB.CheckRedis()
 }
 
-func (c App) GET() revel.Result {
-	var res string
 
-	if err := app.RedisDB.GetJSON("student", &res); err != nil {
-		data := map[string]interface{}{
-			"status": false,
-			"result": "Failed to get the value of the key! " + err.Error(),
+```
+
+
+4) use it! so easy!
+
+For Example, a model file:
+
+```golang
+
+func LoginOut(name, token string) (bool, error) {
+
+	ok, err := CheckLogin(name, token)
+	if err != nil {
+		return false, err
+	}
+
+	if ok {
+		if err := RedisDB.Del(strings.ToLower(name)); err != nil {
+			return false, err
+		} else {
+			return true, nil
 		}
-		return c.RenderJson(data)
+	} else {
+		return false, errors.New("非法操作，不是当前用户!")
 	}
-
-	data := map[string]interface{}{
-		"status": true,
-		"result": res,
-	}
-	return c.RenderJson(data)
 
 }
 ```
