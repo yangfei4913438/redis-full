@@ -110,6 +110,26 @@ func (c RedisCache) Flush() error {
 	return err
 }
 
+func (c RedisCache) Keys() ([]string, error) {
+	conn := c.pool.Get()
+	defer conn.Close()
+	res, err := conn.Do("KEYS", "*")
+	if err != nil {
+		return nil, err
+	}
+
+	result, _ := res.([]interface{})
+
+	var send []string
+
+	for _, v := range result {
+		s, _ := v.([]uint8)
+		send = append(send, string(s))
+	}
+
+	return send, nil
+}
+
 //some tools
 func IsBody(s []interface{}, y interface{}) bool {
 	m := make(map[interface{}]int)
