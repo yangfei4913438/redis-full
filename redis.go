@@ -103,10 +103,17 @@ func (c RedisCache) Exists(key string) (bool, error) {
 	}
 }
 
-func (c RedisCache) Flush() error {
+func (c RedisCache) FlushALL() error {
 	conn := c.pool.Get()
 	defer conn.Close()
 	_, err := conn.Do("FLUSHALL")
+	return err
+}
+
+func (c RedisCache) FlushDB() error {
+	conn := c.pool.Get()
+	defer conn.Close()
+	_, err := conn.Do("FLUSHDB")
 	return err
 }
 
