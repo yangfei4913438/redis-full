@@ -10,26 +10,26 @@ import (
 
 // These tests require redis server running on localhost:6379 (the default)
 const (
-	redisTestServer = "10.0.0.7:6379"
-	redispassword   = ""
-	redisdatabase   = 0
-	MaxIdle         = 1000
-	MaxActive       = 1000
-	IdleTimeout     = 30 * time.Minute
+	TestServer  = "10.0.0.253:6379"
+	password    = ""
+	database    = 0
+	MaxIdle     = 1000
+	MaxActive   = 1000
+	IdleTimeout = 30 * time.Minute
 )
 
 var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) RedisCache {
 	revel.Config = config.NewContext()
 
-	c, err := net.Dial("tcp", redisTestServer)
+	c, err := net.Dial("tcp", TestServer)
 	if err == nil {
 		c.Write([]byte("flush_all\r\n"))
 		c.Close()
-		redisCache := NewRedisCache(redisTestServer, redispassword, redisdatabase, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
-		redisCache.Flush()
+		redisCache := NewRedisCache(TestServer, password, database, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
+		redisCache.FlushDB()
 		return redisCache
 	}
-	t.Errorf("couldn't connect to redis on %s", redisTestServer)
+	t.Errorf("couldn't connect to redis on %s", TestServer)
 	t.FailNow()
 	panic("")
 }
@@ -37,7 +37,7 @@ var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) RedisCac
 //THE END METHOD
 func CheckEND(t *testing.T, newredis RedisFactory) {
 	redisDB := newredis(t, time.Hour)
-	redisDB.Flush()
+	redisDB.FlushDB()
 }
 
 //TaskName must be start with Test_ prefix。
