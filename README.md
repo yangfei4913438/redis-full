@@ -2,8 +2,8 @@
 all of the redis method
 
 ## DEV Version
-- Redis version: 3.2.5
-- Go version: 1.8
+- Redis version: 3.2.12
+- Go version: 1.11
 
 ## How to install
 Use `go get` to install or upgrade (`-u`) the `redis-full` package.
@@ -13,69 +13,56 @@ Use `go get` to install or upgrade (`-u`) the `redis-full` package.
 ## Usage
 Like on the command line using redis to use it! 
 
-#### - use in revel
+#### - use in beego
 
 1）add a init file
 
 ```golang
 
-package app
+package dbs
 
 import (
-	"xxxxx/app/models"
-	"github.com/revel/revel"
+	"github.com/astaxie/beego"
+	redis "github.com/yangfei4913438/redis-full"
+	"strings"
 	"time"
 )
 
-func InitRedis() {
-	hosts, _ := revel.Config.String("cache.redis.hosts")
-	password := revel.Config.StringDefault("cache.redis.password", "")
-	database := revel.Config.IntDefault("cache.redis.db", 0)
-	MaxIdle := revel.Config.IntDefault("cache.redis.maxidle", 100)
-	MaxActive := revel.Config.IntDefault("cache.redis.maxactive", 1000)
-	IdleTimeout := time.Duration(revel.Config.IntDefault("cache.redis.idletimeout", 600)) * time.Second
+//redis对外接口
+var RedisDB redis.RedisCache
 
-	if err := models.NewRD(hosts, password, database, MaxIdle, MaxActive, IdleTimeout); err != nil {
-		revel.ERROR.Println("Redis Server:" + hosts + " Connect failed: " + err.Error() + "!")
+func initRedis() {
+	hosts := beego.AppConfig.String("redis.host")
+	password := beego.AppConfig.DefaultString("redis.password", "")
+	database := beego.AppConfig.DefaultInt("redis.db", 0)
+	MaxIdle := beego.AppConfig.DefaultInt("redis.maxidle", 100)
+	MaxActive := beego.AppConfig.DefaultInt("redis.maxactive", 1000)
+	IdleTimeout := time.Duration(beego.AppConfig.DefaultInt("redis.idletimeout", 600)) * time.Second
+
+	//通过赋值对外接口来使用
+	RedisDB = redis.NewRedisCache(hosts, password, database, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
+
+	if err := RedisDB.CheckRedis(); err != nil {
+		panic("Redis Server:" + hosts + " Connect failed: " + err.Error() + "!")
 	} else {
-		revel.INFO.Println("Redis Server:" + hosts + " Connected!")
+		beego.Info("Connect Redis Server(" + hosts + ") to successful!")
 	}
 }
 
 ```
 
-2) regist to init.go 
+2) register to init.go 
 
 ```golang
 
-func init(){
-    revel.OnAppStart(InitRedis)
+package dbs
+
+func init() {
+	initMysql()
+	initRedis()
 }
 
 ```
-
-3) add redis model file
-
-```golang
-package models
-
-import (
-	redis "github.com/yangfei4913438/redis-full"
-	"time"
-)
-
-var RedisDB redis.RedisCache
-
-func NewRD(hosts, password string, database, MaxIdle, MaxActive int, IdleTimeout time.Duration) error {
-
-	RedisDB = redis.NewRedisCache(hosts, password, database, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
-
-	return RedisDB.CheckRedis()
-}
-
-
-```
-
 
 4) use it! so easy!
 
@@ -83,23 +70,87 @@ For Example, a model file:
 
 ```golang
 
-func LoginOut(name, token string) (bool, error) {
+package models
 
-	ok, err := CheckLogin(name, token)
-	if err != nil {
-		return false, err
-	}
+import (
+	"github.com/astaxie/beego"
+	"strconv"
+	"strings"
+	"testapi/dbs"
+	"testapi/tools"
+)
 
-	if ok {
-		if err := RedisDB.Del(strings.ToLower(name)); err != nil {
-			return false, err
-		} else {
-			return true, nil
+// 用户表结构体,用于接收数据库查询出来的对象，数据类型和数据库尽量保持一致
+type User struct {
+	Id          int64 `json:"id" db:"id"`
+	ReceiveUser
+}
+
+// 添加用户时，接收用户传值的对象
+type ReceiveUser struct {
+	Name  string `json:"name" db:"name"`
+	Age   int64  `json:"age" db:"age"`
+	Email string `json:"email" db:"email"`
+}
+
+// 查询用户
+func SelectUser(id int64) (resObj *User, resErr error) {
+	// 定义redis的key, id转string类型
+	redisKey := "test:user_" + strconv.FormatInt(id, 10)
+
+	// 定义接收数据的对象
+	var user User
+
+	// 先从缓存查询，没有再从数据库查
+	if err := dbs.RedisDB.GetJSON(redisKey, &user); err != nil {
+		if strings.Contains(err.Error(), "key not found") {
+			// key不存在，就重新查询一次
+
+			// 预处理SQL语句
+			selectSql := "select * from users where id=? limit 1"
+
+			// 打印日志
+			beego.Debug("[sql]: "+selectSql, id)
+			err := dbs.MysqlDB.Get(&user, selectSql, id)
+			if err != nil {
+				if err.Error() == "sql: no rows in result set" {
+					beego.Trace("查询结果为空值!")
+
+					// 将空值添加到缓存, 有效期1小时
+					if err1 := dbs.RedisDB.SetJSON(redisKey, nil, tools.OneHour); err1 != nil {
+						beego.Error(err1)
+						return nil, err1
+					}
+					// 返回空值
+					return nil, nil
+				} else {
+					// 打印错误日志
+					beego.Error(err)
+					// 返回错误信息
+					return nil, err
+				}
+			}
+
+			// 将结果添加到缓存
+			if err2 := dbs.RedisDB.SetJSON(redisKey, &user, tools.OneDay); err2 != nil {
+				// 打印错误日志
+				beego.Error(err2)
+				// 返回错误信息
+				return nil, err2
+			}
+
+			// 返回结果给用户
+			return &user, nil
 		}
-	} else {
-		return false, errors.New("非法操作，不是当前用户!")
 	}
 
+	// 空值返回用户信息
+	if user.Id == 0 {
+		// 因为正常情况下，ID是从1开始的。0就表示读取出来的值是空值
+		return nil, nil
+	} else {
+		return &user, nil
+	}
 }
 ```
 

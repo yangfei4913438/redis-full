@@ -1,37 +1,29 @@
 package redis_full
 
 import (
-	"github.com/revel/config"
-	"github.com/revel/revel"
-	"net"
 	"testing"
 	"time"
 )
 
 // These tests require redis server running on localhost:6379 (the default)
 const (
-	TestServer  = "10.0.0.253:6379"
+	TestServer  = "127.0.0.1:6379"
 	password    = ""
-	database    = 0
+	database    = 15
 	MaxIdle     = 1000
 	MaxActive   = 1000
 	IdleTimeout = 30 * time.Minute
 )
 
 var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) RedisCache {
-	revel.Config = config.NewContext()
-
-	c, err := net.Dial("tcp", TestServer)
-	if err == nil {
-		c.Write([]byte("flush_all\r\n"))
-		c.Close()
-		redisCache := NewRedisCache(TestServer, password, database, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
-		redisCache.FlushDB()
-		return redisCache
+	redisCache := NewRedisCache(TestServer, password, database, MaxIdle, MaxActive, IdleTimeout, 24*time.Hour)
+	if err := redisCache.CheckRedis(); err != nil {
+		t.Error("Redis Server:" + TestServer + " Connect failed: " + err.Error() + "!")
+		t.FailNow()
+		panic("")
 	}
-	t.Errorf("couldn't connect to redis on %s", TestServer)
-	t.FailNow()
-	panic("")
+	t.Log("Connect Redis Server(" + TestServer + ") to successful!")
+	return redisCache
 }
 
 //THE END METHOD
