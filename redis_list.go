@@ -3,7 +3,7 @@ package redis_full
 import (
 	"encoding/json"
 	"errors"
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 	"strings"
 	"time"
 )

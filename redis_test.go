@@ -22,7 +22,6 @@ var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) RedisCac
 		t.FailNow()
 		panic("")
 	}
-	t.Log("Connect Redis Server(" + TestServer + ") to successful!")
 	return redisCache
 }
 
@@ -64,6 +63,10 @@ func Test_CheckSMEMBERS(t *testing.T) {
 
 func Test_CheckSCARD(t *testing.T) {
 	CheckSCARD(t, newRedisCache)
+}
+
+func Test_CheckLock(t *testing.T) {
+	CheckLock(t, newRedisCache)
 }
 
 // Please insert test method before the Test_END method!!!
